@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <property name="hibernate.dialect">org.hibernate.dialect.MySQL57Dialect</property>
+        <property name="connection.url">jdbc:mysql://localhost:3306/school_lib?useTimezone=true&amp;serverTimezone=Europe/Moscow</property>
+        <property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+
+        <!--<property name="hibernate.jdbc.time_zone">UTC</property>-->
+
+
+        <!-- NOTE that after automapping with IDEA property username and password will delete -->
+        <!--and will be:  Initial SessionFactory failedorg.hibernate.service.spi.ServiceException: Unable to create requested service-->
+        <property name="connection.username">root</property>
+        <property name="connection.password">root</property>
+        <property name="hibernate.hbm2ddl.auto">update</property>
+        <!--property name="show_sql">true</property-->
+        <mapping class="ru.mera.lib.entity.Book"/>
+        <mapping class="ru.mera.lib.entity.Pupil"/>
+        <mapping class="ru.mera.lib.entity.RecordCard"/>
+
+    </session-factory>
+</hibernate-configuration>
