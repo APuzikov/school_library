@@ -41,7 +41,6 @@ public class BookService {
     Book showOneBook(int id){
         Book book;
             Query query = session.createQuery("from Book where id = " + id);
-//            query.setParameter(0, id);
             try {
                 book = (Book) query.getSingleResult();
             } catch (Exception e){
@@ -61,14 +60,15 @@ public class BookService {
         Query query = session.createQuery("from Book");
         List<Book> books = query.getResultList();
 
-        books.forEach(book ->
+        books.forEach(book -> {
             System.out.println("Номер: " + book.getId() +
-            "        Название: " + book.getTitle() +
-            "        Автор: " + book.getAuthor() +
-            "        Класс: " + book.getClassNumber() +
-            "        Год издания: " + book.getPublishYear() +
-            "        Количество: " + book.getCount()));
-
+                    "        Название: " + book.getTitle() +
+                    "        Автор: " + book.getAuthor() +
+                    "        Класс: " + book.getClassNumber() +
+                    "        Год издания: " + book.getPublishYear() +
+                    "        Количество: " + book.getCount());
+            System.out.println("------------------------------------------------------");
+        });
     }
 
     int inputId(String message) throws IOException{
@@ -160,7 +160,12 @@ public class BookService {
         Book book = showOneBook(id);
 
         if (book != null) {
-            showUpdateMenu();
+            System.out.println("Вберите, что вы хотите изменить в книге:");
+            System.out.println("1. Название");
+            System.out.println("2. Автор");
+            System.out.println("3. Класс");
+            System.out.println("4. Год издания");
+            System.out.println("5. Количество");
             String choice = reader.readLine();
             switch (choice){
                 case "1":{
@@ -211,13 +216,11 @@ public class BookService {
         } else System.out.println("Книга не найдена!");
     }
 
-    private void showUpdateMenu(){
-        System.out.println("Вберите, что вы хотите изменить в книге:");
-        System.out.println("1. Название");
-        System.out.println("2. Автор");
-        System.out.println("3. Класс");
-        System.out.println("4. Год издания");
-        System.out.println("5. Количество");
-
+    public void showBookMenu() throws IOException{
+        System.out.println("");
+        System.out.println("1. Показать список всех книг");
+        System.out.println("2. Найти книгу по названию");
+        System.out.println("3. Найти книгу по классу");
+        System.out.println("");
     }
 }

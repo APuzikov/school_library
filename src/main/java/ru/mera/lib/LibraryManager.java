@@ -1,6 +1,5 @@
 package ru.mera.lib;
 
-
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -16,19 +15,13 @@ public class LibraryManager {
 
     private SessionFactory factory;
     private Session session;
-    private BookService bookService;
-    private PupilService pupilService;
-    private RecordCardService recordCardService;
     private BufferedReader reader;
 
-    public LibraryManager(BufferedReader reader){
+    private  LibraryManager(BufferedReader reader){
         Configuration cfg = new Configuration();
         cfg.configure("hibernate.cfg.xml");
         factory = cfg.buildSessionFactory();
         session = factory.openSession();
-        bookService = new BookService(session, reader);
-        pupilService = new PupilService(session, reader);
-        recordCardService = new RecordCardService(session, reader);
         this.reader = reader;
     }
 
@@ -38,26 +31,16 @@ public class LibraryManager {
         return password.equals("1234");
     }
 
-    private void showMenu(){
-        System.out.println("");
-        System.out.println("Меню:");
-        System.out.println("1. Книги");
-        System.out.println("2. Ученики");
-        System.out.println("3. Учетные карточки");
-        System.out.println("4. Завершить работу");
-        System.out.println("");
-        System.out.println("Для выбора действия, введите номер пункта меню:");
-        System.out.println("");
-    }
-
     private void bookServiceMenu() throws IOException{
         System.out.println("");
         System.out.println("1. Показать все книги");
         System.out.println("2. Добавить новую книгу");
         System.out.println("3. Изменить книгу");
         System.out.println("4. Удалить книгу");
-        System.out.println("5. Возврат в предыдущее меню");
+        System.out.println("0. Возврат в предыдущее меню");
         System.out.println("");
+
+        BookService bookService = new BookService(session, reader);
 
         String choice = reader.readLine();
         switch (choice){
@@ -77,7 +60,7 @@ public class LibraryManager {
                 bookService.deleteBook();
                 break;
             }
-            case "5":{
+            case "0":{
                 mainMenu();
             }
             default:{
@@ -95,14 +78,16 @@ public class LibraryManager {
         System.out.println("1. Показать учеников");
         System.out.println("2. Добавить ученика");
         System.out.println("3. Изменить ученика");
-        System.out.println("4. Удалить ученика");
-        System.out.println("5. Возврат в предыдущее меню");
+        System.out.println("4. Удалить ученика (Предупреждение: будет удалена история выдачи книг этому ученику!)");
+        System.out.println("0. Возврат в предыдущее меню");
         System.out.println("");
+
+        PupilService pupilService = new PupilService(session, reader);
 
         String choice = reader.readLine();
         switch (choice){
             case "1":{
-                pupilService.showPupilsList();
+                pupilService.showPupilsMenu();
                 break;
             }
             case "2":{
@@ -117,7 +102,7 @@ public class LibraryManager {
                 pupilService.deletePupil();
                 break;
             }
-            case "5":{
+            case "0":{
                 mainMenu();
                 break;
             }
@@ -131,27 +116,39 @@ public class LibraryManager {
 
     private void recordCardServiceMenu() throws IOException{
         System.out.println("");
-        System.out.println("1. Посмотреть все учетные карточки");
-        System.out.println("2. Выдать книгу");
-        System.out.println("3. Принять книгу");
-        System.out.println("4. Возврат в предыдущее меню");
+        System.out.println("1. Выдать книгу");
+        System.out.println("2. Принять книгу");
+        System.out.println("3. Ученики, получившие книги");
+        System.out.println("4. Книги, которые не возвращены");
+        System.out.println("5. История выдач");
+        System.out.println("0. Возврат в предыдущее меню");
         System.out.println("");
+
+        RecordCardService recordCardService = new RecordCardService(session, reader);
 
         String choice = reader.readLine();
         switch (choice){
-            case "1": {
-
-                break;
-            }
-            case "2":{
+            case "1":{
                 recordCardService.giveBook();
                 break;
             }
-            case "3":{
+            case "2":{
                 recordCardService.returnBook();
                 break;
             }
+            case "3":{
+                recordCardService.listPupilsWithBook();
+                break;
+            }
             case "4":{
+                recordCardService.listReceivedBooks();
+                break;
+            }
+            case "5":{
+                recordCardService.recordCardsHistory();
+                break;
+            }
+            case "0":{
                 mainMenu();
                 break;
             }
@@ -164,8 +161,16 @@ public class LibraryManager {
     }
 
     private void mainMenu() throws IOException{
+        System.out.println("");
+        System.out.println("Меню:");
+        System.out.println("1. Книги");
+        System.out.println("2. Ученики");
+        System.out.println("3. Учетные карточки");
+        System.out.println("0. Завершить работу");
+        System.out.println("");
+        System.out.println("Для выбора действия, введите номер пункта меню:");
+        System.out.println("");
 
-        showMenu();
         String choice = reader.readLine();
         switch (choice){
             case "1":{
@@ -180,7 +185,7 @@ public class LibraryManager {
                 recordCardServiceMenu();
                 break;
             }
-            case "4":{
+            case "0":{
                 System.out.println("Спасибо за внимание, до новых встреч!");
                 System.exit(0);
                 break;
@@ -205,9 +210,9 @@ public class LibraryManager {
 
         } catch (IOException e){
             e.printStackTrace();
+        } finally {
+            libraryManager.session.close();
+            libraryManager.factory.close();
         }
-
-        libraryManager.session.close();
-        libraryManager.factory.close();
     }
 }

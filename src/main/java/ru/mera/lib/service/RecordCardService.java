@@ -25,7 +25,7 @@ public class RecordCardService {
         pupilService = new PupilService(session, reader);
     }
 
-    private boolean recordCardIsExists(int pupilId, int bookId){
+    private boolean recordCardExists(int pupilId, int bookId){
         Query query = session.createQuery("from RecordCard where pupilId=" + pupilId +
                 " and bookId=" + bookId + " and returnDate = null");
 
@@ -37,7 +37,7 @@ public class RecordCardService {
         }
     }
 
-    private Book getBook(int bookId){
+    private Book findBookById(int bookId){
         Query query = session.createQuery("from Book where id=" + bookId);
         try {
             return (Book)query.getSingleResult();
@@ -46,7 +46,7 @@ public class RecordCardService {
         }
     }
 
-    private Pupil getPupil(int pupilId){
+    private Pupil findPupilById(int pupilId){
         Query query = session.createQuery("from Pupil where id=" + pupilId);
         try {
             return (Pupil) query.getSingleResult();
@@ -55,12 +55,12 @@ public class RecordCardService {
         }
     }
 
-    private List<RecordCard> getRecordCards(int pupilId){
+    private List<RecordCard> findRecordCardsByPupilId(int pupilId){
         List<RecordCard> recordCards;
         Query query = session.createQuery("from RecordCard where pupilId=" + pupilId +
                                              " and returnDate=null");
         try {
-            recordCards = (List<RecordCard>)query.getResultList();
+            recordCards = query.getResultList();
             if (recordCards.size() > 0) return recordCards;
             return null;
         } catch (Exception e){
@@ -68,7 +68,7 @@ public class RecordCardService {
         }
     }
 
-    private RecordCard getOneRecordCard(int pupilId, int bookId){
+    private RecordCard findOneRecordCard(int pupilId, int bookId){
         Query query = session.createQuery("from RecordCard where pupilId=" + pupilId +
                                              " and bookId=" + bookId +
                                              " and returnDate=null");
@@ -82,13 +82,13 @@ public class RecordCardService {
     public void giveBook() throws IOException{
         pupilService.showPupilsList();
         int pupilId = pupilService.inputId("выдачи книги:");
-        Pupil pupil = getPupil(pupilId);
+        Pupil pupil = findPupilById(pupilId);
 
         bookService.showBooksList();
         int bookId = bookService.inputId("выдачи:");
-        Book book = getBook(bookId);
+        Book book = findBookById(bookId);
 
-        if (!recordCardIsExists(pupilId, bookId)){
+        if (!recordCardExists(pupilId, bookId)){
             if(pupil != null) {
                 if (book !=null) {
                     if (book.getCount() > 0) {
@@ -119,22 +119,22 @@ public class RecordCardService {
     public void returnBook() throws IOException {
         pupilService.showPupilsList();
         int pupilId = pupilService.inputId("возврата книги:");
-        Pupil pupil = getPupil(pupilId);
-        List<RecordCard> recordCards = getRecordCards(pupilId);
+        Pupil pupil = findPupilById(pupilId);
+        List<RecordCard> recordCards = findRecordCardsByPupilId(pupilId);
         int bookId;
         RecordCard recordCard;
         if (pupil != null) {
             if (recordCards != null) {
                 recordCards.forEach(recCard -> bookService.showOneBook(recCard.getBookId()));
                 bookId = bookService.inputId("возврата");
-                recordCard = getOneRecordCard(pupilId, bookId);
+                recordCard = findOneRecordCard(pupilId, bookId);
                 if (recordCard != null){
                     session.beginTransaction();
                     SimpleDateFormat dateFormat = new SimpleDateFormat();
                     recordCard.setReturnDate(dateFormat.format( new Date()));
                     session.save(recordCard);
 
-                    Book book = getBook(bookId);
+                    Book book = findBookById(bookId);
                     book.setCount(book.getCount() + 1);
                     session.save(book);
                     session.getTransaction().commit();
@@ -147,6 +147,45 @@ public class RecordCardService {
                 } else System.out.println("Такая книга ученику не выдавалась!");
             } else System.out.println("Этому ученику книги не выдавались!");
         } else System.out.println("Ученик не найден!");
+    }
 
+    public void listPupilsWithBook() {
+        Query query = session.createQuery("from RecordCard where returnDate=null");
+        List<RecordCard> recordCards = query.getResultList();
+
+        recordCards.forEach(recordCard -> {
+            System.out.println("Ученик:");
+            pupilService.showOnePupil(recordCard.getPupilId());
+            System.out.println(recordCard.getReceiveDate() + "   получил книгу:" );
+            bookService.showOneBook(recordCard.getBookId());
+            System.out.println("----------------------------------------------------------------------------------------");
+        });
+    }
+
+    public void listReceivedBooks() {
+        Query query = session.createQuery("from RecordCard where returnDate=null");
+        List<RecordCard> recordCards = query.getResultList();
+
+        recordCards.forEach(recordCard -> {
+            System.out.println("Книга");
+            bookService.showOneBook(recordCard.getBookId());
+            System.out.println("Выдана ученику:");
+            pupilService.showOnePupil(recordCard.getPupilId());
+            System.out.println("-------------------------------------------------------------------------------------");
+        });
+    }
+
+    public void recordCardsHistory(){
+        Query query = session.createQuery("from RecordCard where returnDate<>null");
+        List<RecordCard> recordCards = query.getResultList();
+
+        recordCards.forEach(recordCard -> {
+            System.out.println("Книга");
+            bookService.showOneBook(recordCard.getBookId());
+            System.out.println("Была выдана: " + recordCard.getReceiveDate() + "   и возвращена: " + recordCard.getReturnDate());
+            System.out.println("Ученик:");
+            pupilService.showOnePupil(recordCard.getPupilId());
+            System.out.println("-------------------------------------------------------------------------------------");
+        });
     }
 }
