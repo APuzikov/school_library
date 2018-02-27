@@ -11,8 +11,8 @@
         <!--<property name="hibernate.jdbc.time_zone">UTC</property>-->
 
 
-        <!-- NOTE that after automapping with IDEA property username and password will delete -->
-        <!--and will be:  Initial SessionFactory failedorg.hibernate.service.spi.ServiceException: Unable to create requested service-->
+        <!-- NOTE that after automapping with IDEA property username and password will removeBook -->
+        <!--and will be:  Initial SessionFactory failedorg.hibernate.manager.spi.ServiceException: Unable to create requested manager-->
         <property name="connection.username">root</property>
         <property name="connection.password">root</property>
         <property name="hibernate.hbm2ddl.auto">update</property>
@@ -20,6 +20,7 @@
         <mapping class="ru.mera.lib.entity.Book"/>
         <mapping class="ru.mera.lib.entity.Pupil"/>
         <mapping class="ru.mera.lib.entity.RecordCard"/>
+        <mapping class="ru.mera.lib.entity.Password"/>
 
     </session-factory>
 </hibernate-configuration>

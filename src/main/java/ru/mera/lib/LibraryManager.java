@@ -3,13 +3,16 @@ package ru.mera.lib;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
-import ru.mera.lib.service.BookService;
-import ru.mera.lib.service.PupilService;
-import ru.mera.lib.service.RecordCardService;
+import org.hibernate.query.Query;
+import ru.mera.lib.entity.Password;
+import ru.mera.lib.manager.BookManager;
+import ru.mera.lib.manager.PupilManager;
+import ru.mera.lib.manager.RecordCardManager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.List;
 
 public class LibraryManager {
 
@@ -28,7 +31,13 @@ public class LibraryManager {
     private boolean checkPassword() throws IOException{
         System.out.println("Введите пароль:");
         String password = reader.readLine();
-        return password.equals("1234");
+        Query query = session.createQuery("from Password where enable = true");
+        List<Password> passwords = query.getResultList();
+
+        for (Password p : passwords){
+            if (password.hashCode() == p.getHashPassword()) return true;
+        }
+        return false;
     }
 
     private void bookServiceMenu() throws IOException{
@@ -40,24 +49,24 @@ public class LibraryManager {
         System.out.println("0. Возврат в предыдущее меню");
         System.out.println("");
 
-        BookService bookService = new BookService(session, reader);
+        BookManager bookManager = new BookManager(session, reader);
 
         String choice = reader.readLine();
         switch (choice){
             case "1":{
-                bookService.showBooksList();
+                bookManager.showBooksList();
                 break;
             }
             case "2":{
-                bookService.addNewBook();
+                bookManager.addNewBook();
                 break;
             }
             case "3":{
-                bookService.updateBook();
+                bookManager.updateBook();
                 break;
             }
             case "4":{
-                bookService.deleteBook();
+                bookManager.removeBook();
                 break;
             }
             case "0":{
@@ -70,7 +79,6 @@ public class LibraryManager {
         }
 
         bookServiceMenu();
-
     }
 
     private void pupilServiceMenu() throws IOException{
@@ -82,24 +90,24 @@ public class LibraryManager {
         System.out.println("0. Возврат в предыдущее меню");
         System.out.println("");
 
-        PupilService pupilService = new PupilService(session, reader);
+        PupilManager pupilManager = new PupilManager(session, reader);
 
         String choice = reader.readLine();
         switch (choice){
             case "1":{
-                pupilService.showPupilsMenu();
+                pupilManager.showPupilsMenu();
                 break;
             }
             case "2":{
-                pupilService.addNewPupil();
+                pupilManager.addNewPupil();
                 break;
             }
             case "3":{
-                pupilService.updatePupil();
+                pupilManager.updatePupil();
                 break;
             }
             case "4":{
-                pupilService.deletePupil();
+                pupilManager.removePupil();
                 break;
             }
             case "0":{
@@ -124,28 +132,28 @@ public class LibraryManager {
         System.out.println("0. Возврат в предыдущее меню");
         System.out.println("");
 
-        RecordCardService recordCardService = new RecordCardService(session, reader);
+        RecordCardManager recordCardManager = new RecordCardManager(session, reader);
 
         String choice = reader.readLine();
         switch (choice){
             case "1":{
-                recordCardService.giveBook();
+                recordCardManager.giveBook();
                 break;
             }
             case "2":{
-                recordCardService.returnBook();
+                recordCardManager.returnBook();
                 break;
             }
             case "3":{
-                recordCardService.listPupilsWithBook();
+                recordCardManager.listPupilsWithBook();
                 break;
             }
             case "4":{
-                recordCardService.listReceivedBooks();
+                recordCardManager.listReceivedBooks();
                 break;
             }
             case "5":{
-                recordCardService.recordCardsHistory();
+                recordCardManager.recordCardsHistory();
                 break;
             }
             case "0":{
@@ -192,9 +200,9 @@ public class LibraryManager {
             }
             default:{
                 System.out.println("Неверный ввод!");
+                mainMenu();
             }
         }
-
     }
 
     public static void main(String[] args) {
