@@ -10,10 +10,10 @@ public class Password {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "hashPassword")
+    @Column(name = "hashPassword", nullable = false)
     private int hashPassword;
 
-    @Column(name = "enable")
+    @Column(name = "enable", nullable = false)
     private boolean enable;
 
     public int getId() {

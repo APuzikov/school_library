@@ -6,6 +6,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.query.Query;
 import ru.mera.lib.entity.Password;
 import ru.mera.lib.manager.BookManager;
+import ru.mera.lib.manager.PasswordManager;
 import ru.mera.lib.manager.PupilManager;
 import ru.mera.lib.manager.RecordCardManager;
 
@@ -168,12 +169,49 @@ public class LibraryManager {
         recordCardServiceMenu();
     }
 
+    private void passwordMenu() throws IOException{
+        System.out.println("");
+        System.out.println("1. Добавить пароль");
+        System.out.println("2. Включить пароль");
+        System.out.println("3. Отключить пароль");
+        System.out.println("0. Возврат в предыдущее меню");
+        System.out.println("");
+
+        PasswordManager passwordManager = new PasswordManager(session, reader);
+
+        String choice = reader.readLine();
+        switch (choice){
+            case "1":{
+                passwordManager.addPassword();
+                break;
+            }
+            case "2":{
+                passwordManager.enablePassword();
+                break;
+            }
+            case "3":{
+                passwordManager.disablePassword();
+                break;
+            }
+            case "0":{
+                mainMenu();
+                break;
+            }
+            default:{
+                System.out.println("Неверный ввод!");
+                passwordMenu();
+            }
+        }
+        passwordMenu();
+    }
+
     private void mainMenu() throws IOException{
         System.out.println("");
         System.out.println("Меню:");
         System.out.println("1. Книги");
         System.out.println("2. Ученики");
         System.out.println("3. Учетные карточки");
+        System.out.println("4. Пароли");
         System.out.println("0. Завершить работу");
         System.out.println("");
         System.out.println("Для выбора действия, введите номер пункта меню:");
@@ -191,6 +229,11 @@ public class LibraryManager {
             }
             case "3":{
                 recordCardServiceMenu();
+                break;
+            }
+            case "4":{
+                if(checkPassword()) passwordMenu();
+                else System.out.println("Неверный пароль!");
                 break;
             }
             case "0":{
